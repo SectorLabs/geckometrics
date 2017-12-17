@@ -24,7 +24,8 @@ app.post('/drain/' + token, function (req, res) {
     res.sendStatus(200);
 
     if (!req.logLine) return console.log('Error: No log line parsed.');
-
+    console.log(`Got drain ${req.logLine}`)
+    
     const datePattern = /(\d{4}-\d{2}-\d{2}T\d{2}[\d:.+]*) host/;
     const line = req.logLine;
     let metric = null;
