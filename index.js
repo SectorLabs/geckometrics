@@ -71,7 +71,7 @@ function getQueryForService(type) {
 }
 
 app.get('/service/' + token, function (req, res) {
-    query = getQueryForService('router');
+    const query = getQueryForService('router');
 
     pgQuery(query, (err, result) => {
         if (err) res.sendStatus(500);
