@@ -261,7 +261,7 @@ function getPathType(line) {
     if (!match && !match.length)
     return null;
 
-    const path = match[0];
+    const path = match[1];
     console.log(`path = ${path}`)
     if (path === "" || path === "/") {
         return "home";
