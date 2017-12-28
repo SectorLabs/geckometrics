@@ -163,9 +163,10 @@ function getMetricForRouter(line) {
     if (match) status = match[1];
 
     let path = null;
-    path = getPathType(line)
+    path = getPathType(line);
+    console.log (`path = ${path}`);
 
-    return { type: 'router', date, service, status , path}
+    return { type: 'router', date, service, status, path}
 }
 
 function getMetricForWeb(line) {
