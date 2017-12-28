@@ -48,7 +48,8 @@ app.post('/drain/' + token, function (req, res) {
     saveMetric(metric)
 });
 
-function getQueryForService(type) {
+function getQueryForService(type, path) {
+    const pathCondition = path ? ` AND path ='${path}'` : '';
     return `WITH intervals AS (
                 SELECT
                 i AS  id,
@@ -65,13 +66,13 @@ function getQueryForService(type) {
             FROM intervals
             INNER JOIN metrics ON metrics.date >= intervals.start_time AND metrics.date < intervals.end_time
             WHERE
-            metrics.type = '${type}'
+            metrics.type = '${type}' ${pathCondition}
             GROUP BY intervals.id, intervals.start_time, intervals.end_time
             ORDER BY intervals.id DESC;`;
 }
 
-app.get('/service/' + token, function (req, res) {
-    const query = getQueryForService('router');
+app.get('/service/search/' + token, function (req, res) {
+    const query = getQueryForService('router', 'search');
 
     pgQuery(query, (err, result) => {
         if (err) res.sendStatus(500);
@@ -161,6 +162,9 @@ function getMetricForRouter(line) {
     match = line.match(/status=(\d+)/);
     if (match) status = match[1];
 
+    let path = null;
+    path = getPathType(line)
+
     return { type: 'router', date, service, status }
 }
 
@@ -205,6 +209,7 @@ function saveMetric(metric) {
     if (metric) {
         _.defaults(metric, {
             type: null,
+            path: null,
             date: new Date(),
             source: '',
             status: 0,
@@ -247,6 +252,25 @@ function deleteOldMetrics() {
         if (err) return console.error('error', err);
         console.log(result.rowCount + ' old metrics deleted.');
     });
+}
+
+function getPathType(line) {
+    const match = line.match(/path="(.+?)"/g);
+    if (!match && !match.length)
+    return null;
+
+    const path = match[0];
+    if (path === "" || path === "/") {
+        return "home";
+    }
+
+    if (path.startsWith("/property/")) {
+        return "property";
+    }
+
+    if (path.startsWith("/to-rent/") || path.startsWith("/for-sale/")) {
+        return "search";
+    }
 }
 
 setInterval(deleteOldMetrics, 20 * 60 * 1000);
