@@ -256,13 +256,13 @@ function deleteOldMetrics() {
 }
 
 function getPathType(line) {
-    console.log(`line = ${linne}`)
+    console.log(`line = ${line}`)
     const match = line.match(/path="(.+?)"/g);
     if (!match && !match.length)
     return null;
 
     const path = match[0];
-    console.log(`line = ${path}`)
+    console.log(`path = ${path}`)
     if (path === "" || path === "/") {
         return "home";
     }
