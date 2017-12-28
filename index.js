@@ -165,7 +165,7 @@ function getMetricForRouter(line) {
     let path = null;
     path = getPathType(line)
 
-    return { type: 'router', date, service, status }
+    return { type: 'router', date, service, status , path}
 }
 
 function getMetricForWeb(line) {
