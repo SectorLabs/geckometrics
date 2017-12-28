@@ -164,7 +164,6 @@ function getMetricForRouter(line) {
 
     let path = null;
     path = getPathType(line);
-    console.log (`path = ${path}`);
 
     return { type: 'router', date, service, status, path}
 }
@@ -222,7 +221,7 @@ function saveMetric(metric) {
 
         const query = `INSERT INTO metrics (type, date, source, status, service, memory, memoryquota, load, path) VALUES
             ('${metric.type}', '${moment(metric.date).format('YYYY-MM-DD HH:mm:ss')}', '${metric.source}', '${metric.status}',
-            ${metric.service}, ${metric.memory}, ${metric.memoryquota}, ${metric.load}, ${metric.path})`;
+            ${metric.service}, ${metric.memory}, ${metric.memoryquota}, ${metric.load}, '${metric.path}')`;
         pgQuery(query, () => true);
     }
 }
@@ -256,13 +255,11 @@ function deleteOldMetrics() {
 }
 
 function getPathType(line) {
-    console.log(`line = ${line}`)
     const match = line.match(/path="(.+?)"/);
     if (!match && !match.length)
     return null;
 
     const path = match[1];
-    console.log(`path = ${path}`)
     if (path === "" || path === "/") {
         return "home";
     }
