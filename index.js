@@ -71,23 +71,29 @@ function getQueryForService(type, path) {
             ORDER BY intervals.id DESC;`;
 }
 
-app.get('/service/search/' + token, function (req, res) {
-    const query = getQueryForService('router', 'search');
+app.get('/service/search/' + token, serviceHandler('search'));
+app.get('/service/home/' + token, serviceHandler('home'));
+app.get('/service/property/' + token, serviceHandler('property'));
 
-    pgQuery(query, (err, result) => {
-        if (err) res.sendStatus(500);
-
-        const items = result.rows.map(r => r.average);
-        return res.json({
-            item: [
-                {
-                    value: items[items.length - 1]
-                },
-                items
-            ]
+function serviceHandler(path) {
+    return function (req, res) {
+        const query = getQueryForService('router', path);
+    
+        pgQuery(query, (err, result) => {
+            if (err) res.sendStatus(500);
+    
+            const items = result.rows.map(r => r.average);
+            return res.json({
+                item: [
+                    {
+                        value: items[items.length - 1]
+                    },
+                    items
+                ]
+            });
         });
-    });
-});
+    };
+}
 
 app.get('/throughput/' + token, function (req, res) {
     const query = getQueryForService('router');
