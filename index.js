@@ -49,7 +49,7 @@ app.post('/drain/' + token, function (req, res) {
 });
 
 function getQueryForService(type, path) {
-    const pathCondition = path ? ` AND path ='${path}'` : '';
+    const pathCondition = path ? ` AND metrics.path ='${path}'` : '';
     return `WITH intervals AS (
                 SELECT
                 i AS  id,
@@ -219,9 +219,9 @@ function saveMetric(metric) {
             load: 0
         });
 
-        const query = `INSERT INTO metrics (type, date, source, status, service, memory, memoryquota, load) VALUES
+        const query = `INSERT INTO metrics (type, date, source, status, service, memory, memoryquota, load, path) VALUES
             ('${metric.type}', '${moment(metric.date).format('YYYY-MM-DD HH:mm:ss')}', '${metric.source}', '${metric.status}',
-            ${metric.service}, ${metric.memory}, ${metric.memoryquota}, ${metric.load})`;
+            ${metric.service}, ${metric.memory}, ${metric.memoryquota}, ${metric.load}, ${metric.path})`;
         pgQuery(query, () => true);
     }
 }
