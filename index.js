@@ -257,7 +257,7 @@ function deleteOldMetrics() {
 
 function getPathType(line) {
     console.log(`line = ${line}`)
-    const match = line.match(/path="(.+?)"/g);
+    const match = line.match(/path="(.+?)"/);
     if (!match && !match.length)
     return null;
 
