@@ -256,11 +256,13 @@ function deleteOldMetrics() {
 }
 
 function getPathType(line) {
+    console.log(`line = ${linne}`)
     const match = line.match(/path="(.+?)"/g);
     if (!match && !match.length)
     return null;
 
     const path = match[0];
+    console.log(`line = ${path}`)
     if (path === "" || path === "/") {
         return "home";
     }
@@ -272,6 +274,8 @@ function getPathType(line) {
     if (path.startsWith("/to-rent/") || path.startsWith("/for-sale/")) {
         return "search";
     }
+
+    return null;
 }
 
 setInterval(deleteOldMetrics, 20 * 60 * 1000);
