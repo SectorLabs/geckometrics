@@ -51,14 +51,20 @@ app.post('/drain/' + token, function (req, res) {
 function getQueryForService(type, path) {
     const pathCondition = path ? ` AND metrics.path ='${path}'` : '';
     return `WITH intervals AS (
-                SELECT
-                i AS  id,
-                (now() AT TIME ZONE 'utc') - ((i + 10) || ' seconds') :: INTERVAL start_time,
-                (now() AT TIME ZONE 'utc') - ((i) || ' seconds') :: INTERVAL        end_time
-                FROM generate_series(0, 120, 10) AS i
-            )
-
+        SELECT
+            date_trunc('second', now()) - (trunc(EXTRACT(seconds from now())) :: INTEGER % 10  || 'seconds') :: INTERVAL as start_time,
+            now() as end_time
+        UNION 
+        SELECT
+            (ref_time AT TIME ZONE 'utc') - ((i + 10) || ' seconds') :: INTERVAL start_time,
+            (ref_time AT TIME ZONE 'utc') - (i || ' seconds') :: INTERVAL end_time
+        FROM (
             SELECT
+                date_trunc('second', now()) - (trunc(EXTRACT(seconds from now())) :: INTEGER % 10  || 'seconds') :: INTERVAL as ref_time,
+                generate_series(0, 120, 10) AS i) t  
+        )
+
+        SELECT
             count(metrics.id),
                 avg(metrics.service) AS average,
                 intervals.start_time,
@@ -67,8 +73,8 @@ function getQueryForService(type, path) {
             INNER JOIN metrics ON metrics.date >= intervals.start_time AND metrics.date < intervals.end_time
             WHERE
             metrics.type = '${type}' ${pathCondition}
-            GROUP BY intervals.id, intervals.start_time, intervals.end_time
-            ORDER BY intervals.id DESC;`;
+            GROUP BY intervals.start_time
+            ORDER BY intervals.start_time;`;
 }
 
 app.get('/service/search/' + token, serviceHandler('search'));
