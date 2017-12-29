@@ -87,7 +87,10 @@ function serviceHandler(path) {
         const query = getQueryForService('router', path);
     
         pgQuery(query, (err, result) => {
-            if (err) res.sendStatus(500);
+            if (err) {
+                console.log(`err ${err.stack}`)
+                res.sendStatus(500);
+            }
     
             const items = result.rows.map(r => r.average);
             return res.json({
