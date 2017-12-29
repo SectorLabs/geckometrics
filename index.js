@@ -51,17 +51,19 @@ app.post('/drain/' + token, function (req, res) {
 function getQueryForService(type, path) {
     const pathCondition = path ? ` AND metrics.path ='${path}'` : '';
     return `WITH intervals AS (
-        SELECT
-            date_trunc('second', now()) - (trunc(EXTRACT(seconds from now())) :: INTEGER % 10  || 'seconds') :: INTERVAL as start_time,
-            now() as end_time
-        UNION 
-        SELECT
-            (ref_time AT TIME ZONE 'utc') - ((i + 10) || ' seconds') :: INTERVAL start_time,
-            (ref_time AT TIME ZONE 'utc') - (i || ' seconds') :: INTERVAL end_time
-        FROM (
+            WITH formula(ref_time, period) AS (
+                VALUES(date_trunc('second', now()) - (trunc(EXTRACT(seconds from now())) :: INTEGER % 10  || 'seconds') :: INTERVAL,
+                    10)
+            )
             SELECT
-                date_trunc('second', now()) - (trunc(EXTRACT(seconds from now())) :: INTEGER % 10  || 'seconds') :: INTERVAL as ref_time,
-                generate_series(0, 120, 10) AS i) t  
+                ref_time as start_time,
+                now() as end_time
+                FROM formula
+            UNION 
+            SELECT
+                ref_time - ((i + period) || ' seconds') :: INTERVAL start_time,
+                ref_time - (i || ' seconds') :: INTERVAL end_time
+            FROM formula, (SELECT generate_series(0, 120, period) AS i FROM formula) t
         )
 
         SELECT
