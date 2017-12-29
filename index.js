@@ -72,7 +72,7 @@ function getQueryForService(type, path) {
             FROM intervals
             LEFT JOIN metrics ON 
                 metrics.date >= intervals.start_time AND 
-                metrics.date < intervals.end_time
+                metrics.date < intervals.end_time AND
                 metrics.type = '${type}' ${pathCondition}
             GROUP BY intervals.start_time, intervals.end_time
             ORDER BY intervals.start_time;`;
