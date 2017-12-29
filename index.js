@@ -53,8 +53,8 @@ function getQueryForService(type, path) {
     return `WITH intervals AS (
                 SELECT
                 i AS  id,
-                (now() AT TIME ZONE 'utc') - ((i + 10) || ' minutes') :: INTERVAL start_time,
-                (now() AT TIME ZONE 'utc') - ((i) || ' minutes') :: INTERVAL        end_time
+                (now() AT TIME ZONE 'utc') - ((i + 10) || ' seconds') :: INTERVAL start_time,
+                (now() AT TIME ZONE 'utc') - ((i) || ' seconds') :: INTERVAL        end_time
                 FROM generate_series(0, 120, 10) AS i
             )
 
