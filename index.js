@@ -63,7 +63,7 @@ function getQueryForService(type, path) {
             SELECT
                 ref_time - ((i + period) || ' seconds') :: INTERVAL start_time,
                 ref_time - (i || ' seconds') :: INTERVAL end_time
-            FROM formula, (SELECT generate_series(0, 120, period) AS i FROM formula) t
+            FROM formula, (SELECT generate_series(0, 3600, period) AS i FROM formula) t
         )
 
         SELECT
