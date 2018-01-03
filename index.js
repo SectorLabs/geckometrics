@@ -119,7 +119,7 @@ app.get('/throughput/' + token, function (req, res) {
                 {
                     value: items[items.length - 1]
                 },
-                items
+                items.slice(0, items.length - 1)
             ]
         });
     });
@@ -278,15 +278,17 @@ function getPathType(line) {
     return null;
 
     const path = match[1];
-    if (path === "" || path === "/") {
+    if (path === "" || path === "/" ||
+        path === "/ar" || path === "/ar/") {
         return "home";
     }
 
-    if (path.startsWith("/property/")) {
+    if (path.startsWith("/property/") || path.startsWith("/ar/property/")) {
         return "property";
     }
 
-    if (path.startsWith("/to-rent/") || path.startsWith("/for-sale/")) {
+    if (path.startsWith("/to-rent/") || path.startsWith("/for-sale/") ||
+        path.startsWith("/ar/to-rent/") || path.startsWith("/ar/for-sale/")) {
         return "search";
     }
 
