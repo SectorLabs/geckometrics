@@ -68,7 +68,7 @@ function getQueryForService(type, path) {
 
         SELECT
             count(metrics.id),
-                avg(metrics.service) AS average,
+                max(metrics.service) AS maximum,
                 intervals.start_time,
                 intervals.end_time
             FROM intervals
@@ -94,7 +94,7 @@ function serviceHandler(path) {
                 res.sendStatus(500);
             }
     
-            const items = result.rows.map(r => r.average);
+            const items = result.rows.map(r => r.maximum);
             return res.json({
                 item: [
                     {
