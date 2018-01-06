@@ -129,6 +129,7 @@ app.get('/service/property/' + token, serviceHandler('property'));
 
 app.get('/throughput/' + token, throughputHandler());
 app.get('/throughput/results/' + token, throughputHandler('results'));
+app.get('/throughput/view/' + token, throughputHandler('view'));
 
 app.get('/memory/' + token, function (req, res) {
     const query = `
@@ -299,6 +300,10 @@ function getPathType(line) {
 
     if (path.startsWith("/api/areaguide/")) {
         return "results";
+    }
+
+    if (path.startsWith("/api/listing/")) {
+        return "view";
     }
 
     return null;
