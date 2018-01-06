@@ -128,6 +128,7 @@ app.get('/service/home/' + token, serviceHandler('home'));
 app.get('/service/property/' + token, serviceHandler('property'));
 
 app.get('/throughput/' + token, throughputHandler());
+app.get('/throughput/frontend/' + token, throughputHandler());
 app.get('/throughput/results/' + token, throughputHandler('results'));
 app.get('/throughput/view/' + token, throughputHandler('view'));
 
