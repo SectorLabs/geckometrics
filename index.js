@@ -49,7 +49,7 @@ app.post('/drain/' + token, function (req, res) {
 });
 
 function getQueryForService(type, path) {
-    const pathCondition = path ? ` AND metrics.path ='${path}'` : ` AND metrics.path <> ''`;
+    const pathCondition = path ? ` AND metrics.path ='${path}'` : ` AND metrics.path IN ('search', 'home', 'property)`;
     return `WITH intervals AS (
             WITH formula(ref_time, period) AS (
                 VALUES(date_trunc('second', now()) - (trunc(EXTRACT(seconds from now())) :: INTEGER % 10  || 'seconds') :: INTERVAL,
@@ -107,23 +107,27 @@ function serviceHandler(path) {
     };
 }
 
-app.get('/throughput/' + token, function (req, res) {
-    const query = getQueryForService('router');
-
-    pgQuery(query, (err, result) => {
-        if (err) res.sendStatus(500);
-
-        const items = result.rows.map(r => r.count / 10);
-        return res.json({
-            item: [
-                {
-                    value: items[items.length - 1]
-                },
-                items.slice(0, items.length - 1)
-            ]
+function throughputHandler(path) {
+    return function (req, res) {
+        const query = getQueryForService('router', path);
+        
+        pgQuery(query, (err, result) => {
+            if (err) res.sendStatus(500);
+    
+            const items = result.rows.map(r => r.count / 10);
+            return res.json({
+                item: [
+                    {
+                        value: items[items.length - 1]
+                    },
+                    items.slice(0, items.length - 1)
+                ]
+            });
         });
-    });
-});
+    };
+}
+app.get('/throughput/' + token, throughputHandler());
+app.get('/throughput/results/' + token, throughputHandler('results'));
 
 app.get('/memory/' + token, function (req, res) {
     const query = `
@@ -290,6 +294,10 @@ function getPathType(line) {
     if (path.startsWith("/to-rent/") || path.startsWith("/for-sale/") ||
         path.startsWith("/ar/to-rent/") || path.startsWith("/ar/for-sale/")) {
         return "search";
+    }
+
+    if (path.startsWith("/api/areaguide/") {
+        return "results";
     }
 
     return null;
