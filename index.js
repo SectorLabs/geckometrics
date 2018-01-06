@@ -49,7 +49,7 @@ app.post('/drain/' + token, function (req, res) {
 });
 
 function getQueryForService(type, path) {
-    const pathCondition = path ? ` AND metrics.path ='${path}'` : ` AND metrics.path IN ('search', 'home', 'property)`;
+    const pathCondition = path ? ` AND metrics.path ='${path}'` : ` AND metrics.path IN ('search', 'home', 'property')`;
     return `WITH intervals AS (
             WITH formula(ref_time, period) AS (
                 VALUES(date_trunc('second', now()) - (trunc(EXTRACT(seconds from now())) :: INTEGER % 10  || 'seconds') :: INTERVAL,
