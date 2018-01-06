@@ -168,7 +168,7 @@ app.get('/memory/' + token, function (req, res) {
         });
     });
 });
-
+setInterval(deleteOldMetrics, 20 * 60 * 1000);
 const port = process.env.PORT || 3000;
 app.listen(port, function () {
     console.log('listening on port ' + port);
@@ -310,6 +310,6 @@ function getPathType(line) {
     return null;
 }
 
-setInterval(deleteOldMetrics, 20 * 60 * 1000);
+
 console.log('Deleting old metrics.');
 deleteOldMetrics();
