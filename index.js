@@ -80,10 +80,6 @@ function getQueryForService(type, path) {
             ORDER BY intervals.start_time;`;
 }
 
-app.get('/service/search/' + token, serviceHandler('search'));
-app.get('/service/home/' + token, serviceHandler('home'));
-app.get('/service/property/' + token, serviceHandler('property'));
-
 function serviceHandler(path) {
     return function (req, res) {
         const query = getQueryForService('router', path);
@@ -126,6 +122,11 @@ function throughputHandler(path) {
         });
     };
 }
+
+app.get('/service/search/' + token, serviceHandler('search'));
+app.get('/service/home/' + token, serviceHandler('home'));
+app.get('/service/property/' + token, serviceHandler('property'));
+
 app.get('/throughput/' + token, throughputHandler());
 app.get('/throughput/results/' + token, throughputHandler('results'));
 
@@ -296,7 +297,7 @@ function getPathType(line) {
         return "search";
     }
 
-    if (path.startsWith("/api/areaguide/") {
+    if (path.startsWith("/api/areaguide/")) {
         return "results";
     }
 
