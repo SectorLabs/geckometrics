@@ -274,18 +274,30 @@ function commitMetricsBuffer() {
     const query = `INSERT INTO metrics (type, date, source, status, service, memory, memoryquota, load, path) VALUES
         ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
     const success = true;
-    pgQuery(query, (err, res) => {
+
+    failed_metrics = [];
+    pg.connect(process.env.DATABASE_URL, function (err, client, done) {
         if (err) {
-            console.log(`Error savinng metrics ${err.stack}`);
-            success = false;
+            console.error('error fetching client from pool', err);
+            if (client) done(client);
+            failed_metrics = metrics_buffer;
+            return;
         }
-    }, metrics_buffer);
-    if (success) {
-        metrics_buffer = [];
-    }
+        metrics_buffer.forEach(params => {
+            client.query(query, params, function (err, result) {
+                if (err) {
+                    console.error('error querying', query, err);
+                    failed_metrics.push(failed_metrics);
+                }
+            });
+            done();
+        })
+    });
+
+    metrics_buffer = failed;
 }
 
-function pgQuery(query, callback, params) {
+function pgQuery(query, callback) {
     pg.connect(process.env.DATABASE_URL, function (err, client, done) {
         if (err) {
             console.error('error fetching client from pool', err);
@@ -293,7 +305,7 @@ function pgQuery(query, callback, params) {
             return callback(err);
         }
 
-        client.query(query, params, function (err, result) {
+        client.query(query, function (err, result) {
             if (err) {
                 console.error('error querying', query, err);
                 if (client) done(client);
