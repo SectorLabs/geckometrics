@@ -267,6 +267,9 @@ function saveMetric(metric) {
 }
 
 function commitMetricsBuffer() {
+    if (metrics_buffer.length === 0) {
+        return;
+    }
     console.log(`Commiting ${metrics_buffer.length} records to the database`);
     const query = `INSERT INTO metrics (type, date, source, status, service, memory, memoryquota, load, path) VALUES
         ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
