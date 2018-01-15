@@ -273,7 +273,6 @@ function commitMetricsBuffer() {
     console.log(`Commiting ${metrics_buffer.length} records to the database`);
     const query = `INSERT INTO metrics (type, date, source, status, service, memory, memoryquota, load, path) VALUES
         ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
-    const success = true;
 
     let failed_metrics = [];
     pg.connect(process.env.DATABASE_URL, function (err, client, done) {
@@ -286,12 +285,12 @@ function commitMetricsBuffer() {
         metrics_buffer.forEach(params => {
             client.query(query, params, function (err, result) {
                 if (err) {
-                    console.error('error querying', query, err);
-                    failed_metrics.push(failed_metrics);
+                    console.error('error insterting metrics', query, err, params);
+                    failed_metrics.push(params);
                 }
             });
-            done();
         })
+        done();
     });
 
     metrics_buffer = failed_metrics;
