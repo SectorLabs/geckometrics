@@ -252,20 +252,34 @@ function saveMetric(metric) {
             memoryquota: 0,
             load: 0
         });
-        metrics_buffer.push(metric);
+        metrics_buffer.push([
+            metric.type,
+            moment(metric.date).format('YYYY-MM-DD HH:mm:ss'),
+            metric.source,
+            metric.status,
+            metric.service,
+            metric.memory,
+            metric.memoryquota,
+            metric.load,
+            metric.path
+        ]);
     }
 }
 
 function commitMetricsBuffer() {
     console.log(`Commiting ${metrics_buffer.length} records to the database`);
-    metrics_buffer.forEach(metric => {
-
-        const query = `INSERT INTO metrics (type, date, source, status, service, memory, memoryquota, load, path) VALUES
-            ('${metric.type}', '${moment(metric.date).format('YYYY-MM-DD HH:mm:ss')}', '${metric.source}', '${metric.status}',
-            ${metric.service}, ${metric.memory}, ${metric.memoryquota}, ${metric.load}, '${metric.path}')`;
-        pgQuery(query, () => true);
+    const query = `INSERT INTO metrics (type, date, source, status, service, memory, memoryquota, load, path) VALUES
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
+    const success = true;
+    pgQuery(query, metrics_buffer, (err, res) => {
+        if (err) {
+            console.log(`Error savinng metrics ${err.stack}`);
+            success = false;
+        }
     });
-    metrics_buffer = [];
+    if (success) {
+        metrics_buffer = [];
+    }
 }
 
 function pgQuery(query, callback) {
