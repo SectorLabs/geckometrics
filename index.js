@@ -274,18 +274,18 @@ function commitMetricsBuffer() {
     const query = `INSERT INTO metrics (type, date, source, status, service, memory, memoryquota, load, path) VALUES
         ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
     const success = true;
-    pgQuery(query, metrics_buffer, (err, res) => {
+    pgQuery(query, (err, res) => {
         if (err) {
             console.log(`Error savinng metrics ${err.stack}`);
             success = false;
         }
-    });
+    }, metrics_buffer);
     if (success) {
         metrics_buffer = [];
     }
 }
 
-function pgQuery(query, callback) {
+function pgQuery(query, callback, params) {
     pg.connect(process.env.DATABASE_URL, function (err, client, done) {
         if (err) {
             console.error('error fetching client from pool', err);
@@ -293,7 +293,7 @@ function pgQuery(query, callback) {
             return callback(err);
         }
 
-        client.query(query, function (err, result) {
+        client.query(query, params, function (err, result) {
             if (err) {
                 console.error('error querying', query, err);
                 if (client) done(client);
