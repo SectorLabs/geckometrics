@@ -294,7 +294,7 @@ function commitMetricsBuffer() {
         })
     });
 
-    metrics_buffer = failed;
+    metrics_buffer = failed_metrics;
 }
 
 function pgQuery(query, callback) {
