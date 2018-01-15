@@ -275,7 +275,7 @@ function commitMetricsBuffer() {
         ($1, $2, $3, $4, $5, $6, $7, $8, $9)`;
     const success = true;
 
-    failed_metrics = [];
+    let failed_metrics = [];
     pg.connect(process.env.DATABASE_URL, function (err, client, done) {
         if (err) {
             console.error('error fetching client from pool', err);
