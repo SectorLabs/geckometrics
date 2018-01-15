@@ -7,6 +7,7 @@ const pg = require('pg');
 
 const datePattern = /(\d{4}-\d{2}-\d{2}T\d{2}[\d:.+]*) host/;
 const token = process.env.TOKEN;
+let metrics_buffer = [];
 
 const app = express();
 function bodyParser(req, res, next) {
@@ -88,6 +89,7 @@ function serviceHandler(path) {
             if (err) {
                 console.log(`err ${err.stack}`)
                 res.sendStatus(500);
+                return;
             }
     
             const items = result.rows.map(r => r.maximum);
@@ -108,7 +110,11 @@ function throughputHandler(path) {
         const query = getQueryForService('router', path);
         
         pgQuery(query, (err, result) => {
-            if (err) res.sendStatus(500);
+            if (err) {
+                console.log(`err ${err.stack}`)
+                res.sendStatus(500);
+                return;
+            }
     
             const items = result.rows.map(r => r.count / 10);
             return res.json({
@@ -168,7 +174,10 @@ app.get('/memory/' + token, function (req, res) {
         });
     });
 });
+
 setInterval(deleteOldMetrics, 20 * 60 * 1000);
+setInterval(commitMetricsBuffer, 1000);
+
 const port = process.env.PORT || 3000;
 app.listen(port, function () {
     console.log('listening on port ' + port);
@@ -243,12 +252,20 @@ function saveMetric(metric) {
             memoryquota: 0,
             load: 0
         });
+        metrics_buffer.push(metric);
+    }
+}
+
+function commitMetricsBuffer() {
+    console.log(`Commiting ${metrics_buffer.length} records to the database`);
+    metrics_buffer.forEach(metric => {
 
         const query = `INSERT INTO metrics (type, date, source, status, service, memory, memoryquota, load, path) VALUES
             ('${metric.type}', '${moment(metric.date).format('YYYY-MM-DD HH:mm:ss')}', '${metric.source}', '${metric.status}',
             ${metric.service}, ${metric.memory}, ${metric.memoryquota}, ${metric.load}, '${metric.path}')`;
         pgQuery(query, () => true);
-    }
+    });
+    metrics_buffer = [];
 }
 
 function pgQuery(query, callback) {
